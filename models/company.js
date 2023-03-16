@@ -47,17 +47,40 @@ class Company {
   /** Find all companies.
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   * 
+   * Checks for added params for name, minEmployees, and/or maxEmployees. If any combination of those params are present those params are added to the query.
    * */
 
-  static async findAll() {
-    const companiesRes = await db.query(
-          `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           ORDER BY name`);
+  static async findAll(name, minEmployees, maxEmployees) {
+    let q = `SELECT handle,
+          name,
+          description,
+          num_employees AS "numEmployees",
+          logo_url AS "logoUrl"
+      FROM companies`;
+    let whereAdded = false;
+    if(name) {
+      q = `${q} WHERE name = '${name}'`;
+      whereAdded = true;
+    }
+    if(minEmployees) {
+      if(whereAdded) {
+        q = `${q} AND num_employees >= ${minEmployees}`;
+      } else {
+        q = `${q} WHERE num_employees >= ${minEmployees}`;
+      }
+      whereAdded = true;
+    }
+    if(maxEmployees) {
+      if(whereAdded) {
+        q = `${q} AND num_employees <= ${maxEmployees}`;
+      } else {
+        q = `${q} WHERE num_employees <= ${maxEmployees}`;
+      }
+      whereAdded = true;
+    }
+    q = `${q} ORDER BY name`;
+    const companiesRes = await db.query(q);
     return companiesRes.rows;
   }
 

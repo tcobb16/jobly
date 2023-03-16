@@ -1,6 +1,8 @@
 const { BadRequestError } = require("../expressError");
 
-// THIS NEEDS SOME GREAT DOCUMENTATION.
+// Takes in data that will be used to update the database. 
+// dataToUpdate: colName to value to update
+// jsToSql: object representing a mapping of js column names to postgres column names
 
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);

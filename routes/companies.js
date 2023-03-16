@@ -52,7 +52,11 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
-    const companies = await Company.findAll();
+    const {name, minEmployees, maxEmployees}= req.query;
+    if (minEmployees > maxEmployees){
+      return res.status(400).json({ err: "min employee can't be more than max employee"});
+    }
+    const companies = await Company.findAll(name, minEmployees, maxEmployees);
     return res.json({ companies });
   } catch (err) {
     return next(err);
