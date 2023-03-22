@@ -112,7 +112,21 @@ class User {
            ORDER BY username`,
     );
 
-    return result.rows;
+    const users = result.rows;
+    for(const user of users) {
+      const applications = await db.query(
+        `SELECT job_id AS "jobId"
+         FROM applications
+         WHERE username = $1`,
+        [user.username],
+      );
+      user.jobs = [];
+      for(const app of applications.rows) {
+        user.jobs.push(app.jobId);
+      }
+    }
+
+    return users;
   }
 
   /** Given a username, return data about user.
@@ -138,6 +152,17 @@ class User {
     const user = userRes.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
+
+    const applications = await db.query(
+      `SELECT job_id AS "jobId"
+       FROM applications
+       WHERE username = $1`,
+      [username],
+    );
+    user.jobs = [];
+    for(const app of applications.rows) {
+      user.jobs.push(app.jobId);
+    }
 
     return user;
   }
@@ -203,6 +228,19 @@ class User {
     const user = result.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
+  }
+
+  static async apply(username, jobId) {
+    await db.query(
+          `INSERT INTO applications
+          (username, job_id)
+          VALUES ($1, $2)
+          RETURNING  username, job_id AS "jobId"`,
+      [
+        username,
+        jobId
+      ],
+    );
   }
 }
 

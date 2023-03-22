@@ -118,5 +118,14 @@ router.delete("/:username", ensureLoggedIn, async function (req, res, next) {
   }
 });
 
+router.post("/:username/jobs/:jobid", ensureLoggedIn, async function (req, res, next) {
+  try {
+    await User.apply(req.params.username, req.params.jobid);
+    return res.status(201).json({ applied: req.params.jobid });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 
 module.exports = router;
